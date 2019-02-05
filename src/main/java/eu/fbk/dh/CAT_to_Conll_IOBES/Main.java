@@ -79,12 +79,12 @@ public class Main {
                                 if (token_anchor.getLength() == 1){
                                     String tagname = ((Element) fileNode).getTagName();
                                     String ref_id = ((Element) token_anchor.item(0)).getAttribute("t_id");
-                                    annotated_tokens.put(tagname + ref_id, "S-" + tagname );
+                                    annotated_tokens.put(tagname + ref_id, "S-" + tagname +"\n" );
                                 }else{
                                     for (int anchor_id = 0; anchor_id < token_anchor.getLength(); anchor_id++) {
                                         String tagname = ((Element) fileNode).getTagName();
                                         String ref_id = ((Element) token_anchor.item(anchor_id)).getAttribute("t_id");
-                                        annotated_tokens.put(tagname + ref_id, anchor_id == 0 ? "B-" + tagname : (anchor_id == (token_anchor.getLength() -1) ? "E-" + tagname : "I-" + tagname));
+                                        annotated_tokens.put(tagname + ref_id, anchor_id == 0 ? "B-" + tagname : (anchor_id == (token_anchor.getLength() -1) ? "E-" + tagname +"\n" : "I-" + tagname));
                                     }
                                 }
 
@@ -99,6 +99,9 @@ public class Main {
                             ArrayList<String> blacklist = new ArrayList<>();
                             blacklist.add("LOCATION");
                             blacklist.add("TIMEX3");
+
+
+                            boolean isInside = false;
 
                             for (int i = 0; i < tokens.getLength(); i++) {
                                 Node fileNode = tokens.item(i);
@@ -121,11 +124,26 @@ public class Main {
                                     } // add for custom
                                 }
 
-                                if (current_sentence != sentence_number) {
-                                    current_sentence = sentence_number;
-                                    sb.append("\n");
+//                                if (current_sentence != sentence_number) {
+//                                    current_sentence = sentence_number;
+//                                    sb.append("\n");
+//                                }
+
+
+                                String prepend ="";
+                                if (isInside && tok.get(1).startsWith("B-") ){
+                                    prepend = "\n";
                                 }
-                                sb.append(Joiner.on("\t").skipNulls().join(tok) + "\n");
+
+
+                                sb.append( prepend + Joiner.on("\t").skipNulls().join(tok) + "\n");
+
+                                if (tok.get(1).startsWith("I-") || tok.get(1).equals("O")) {
+                                    isInside = true;
+                                }else{
+                                    isInside = false;
+                                }
+
 
                             }
 
